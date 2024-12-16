@@ -1,0 +1,2675 @@
+
+package luckyseven.banking_system;
+
+import java.awt.Image;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.util.*;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author JYLEREAL
+ */
+
+public class bankingSystem extends javax.swing.JFrame {
+//    These are global data that can and may be used on different functions
+    public static String SUrl = "jdbc:MySQL://localhost:3306/bankmanagementsystem";
+    public static String SUser = "bankingmanagementsystem";
+    public static String SPass = "bms_2023";
+    public static int confirmYesNo = 0;
+    public static int checkProfileField = 0;
+    public static float totalAmount = 0;
+    public static float transactionCharge = 15;
+    
+    public bankingSystem() {
+        initComponents();
+        setLocationRelativeTo(null);
+        dateToday(); resizeImage();
+        transactionTable(); transferTab();
+        accNumField.setEnabled(false);
+    }
+//    For home tab(logo) and developers tab(pictures)auto resizing jpg/png based on the label swing size
+    public void resizeImage() {
+        ImageIcon logoIcon = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//logo.png");
+        Image logo = logoIcon.getImage();
+        Image logoScale = logo.getScaledInstance(labelLogo.getWidth(), labelLogo.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon scaledLogo = new ImageIcon(logoScale);
+        labelLogo.setIcon(scaledLogo);
+        
+        ImageIcon devIcon1 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//dizon.jpg");
+        Image devImage1 = devIcon1.getImage();
+        Image devScale1 = devImage1.getScaledInstance(developerPic1.getWidth(), developerPic1.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled1 = new ImageIcon(devScale1);
+        developerPic1.setIcon(devScaled1);
+        
+        ImageIcon devIcon2 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//domingo.jpg");
+        Image devImage2 = devIcon2.getImage();
+        Image devScale2 = devImage2.getScaledInstance(developerPic2.getWidth(), developerPic2.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled2 = new ImageIcon(devScale2);
+        developerPic2.setIcon(devScaled2);
+        
+        ImageIcon devIcon3 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//duque.jpg");
+        Image devImage3 = devIcon3.getImage();
+        Image devScale3 = devImage3.getScaledInstance(developerPic3.getWidth(), developerPic3.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled3 = new ImageIcon(devScale3);
+        developerPic3.setIcon(devScaled3);
+        
+        ImageIcon devIcon4 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//galang.jpg");
+        Image devImage4 = devIcon4.getImage();
+        Image devScale4 = devImage4.getScaledInstance(developerPic4.getWidth(), developerPic4.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled4 = new ImageIcon(devScale4);
+        developerPic4.setIcon(devScaled4);
+        
+        ImageIcon devIcon5 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//gegante.jpg");
+        Image devImage5 = devIcon5.getImage();
+        Image devScale5 = devImage5.getScaledInstance(developerPic5.getWidth(), developerPic5.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled5 = new ImageIcon(devScale5);
+        developerPic5.setIcon(devScaled5);
+        
+        ImageIcon devIcon6 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//lacap.jpg");
+        Image devImage6 = devIcon6.getImage();
+        Image devScale6 = devImage6.getScaledInstance(developerPic6.getWidth(), developerPic6.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled6 = new ImageIcon(devScale6);
+        developerPic6.setIcon(devScaled6);
+        
+        ImageIcon devIcon7 = new ImageIcon("C://Users//JYLEREAL//Downloads//Banking_System//Bank_Management//src//luckyseven//assets//lascano.jpg");
+        Image devImage7 = devIcon7.getImage();
+        Image devScale7 = devImage7.getScaledInstance(developerPic7.getWidth(), developerPic7.getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon devScaled7 = new ImageIcon(devScale7);
+        developerPic7.setIcon(devScaled7);
+    }
+    
+//  Search and Reload Data
+    public void searchData() {
+        String searchBy = searchByCombo.getItemAt(searchByCombo.getSelectedIndex());
+        String searchValue = searchField.getText();
+        ((DefaultTableModel)searchTable.getModel()).setRowCount(0);//(null, new String[]{"Account Number","Given Name","Middle Name","Surname", "Date of Birth", "Mobile Number"}, null));
+
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+            Statement statementSQL = connectionSQL.createStatement();
+
+            DefaultTableModel model = (DefaultTableModel)searchTable.getModel();
+            String sqlCode = "";
+            if("Account Number".equals(searchBy) | "All".equals(searchBy)) {
+                if("Account Number".equals(searchBy)) {
+                    sqlCode = "SELECT * FROM bank_client WHERE AccountNo ="+searchValue;
+                }else if("All".equals(searchBy) | "".equals(searchValue)) {
+                    sqlCode += "SELECT * FROM bank_client";
+                }
+                ResultSet getResult = statementSQL.executeQuery(sqlCode);
+
+                while(getResult.next()){
+                  model.addRow(new String[] {getResult.getString(1), getResult.getString(2), getResult.getString(3), 
+                      getResult.getString(4), getResult.getString(5), getResult.getString(6), getResult.getString(7), 
+                      getResult.getString(8), getResult.getString(9), getResult.getString(11), getResult.getString(10), 
+                      getResult.getString(12)});
+                }
+                }else {
+                    if("Given Name".equals(searchBy)) {
+                        sqlCode = "SELECT * FROM bank_client WHERE GivenName LIKE ?";
+                    }else if("Middle Name".equals(searchBy)) {
+                        sqlCode = "SELECT * FROM bank_client WHERE MiddleName LIKE ?";
+                    }else if("Surname".equals(searchBy)) {
+                        sqlCode = "SELECT * FROM bank_client WHERE Surname LIKE ?";
+                    }//else if("".equals(searchValue)) {
+                     //   sqlCode = "SELECT * FROM bank_client";
+                    //}
+                    PreparedStatement pst = connectionSQL.prepareStatement(sqlCode);
+                    pst.setString(1, '%'+searchValue+'%');
+                    ResultSet getResult = pst.executeQuery();
+
+                    while(getResult.next()){
+                      model.addRow(new String[] {getResult.getString(1), getResult.getString(2), getResult.getString(3), 
+                          getResult.getString(4), getResult.getString(5), getResult.getString(6), getResult.getString(7), 
+                          getResult.getString(8), getResult.getString(9), getResult.getString(11), getResult.getString(10), 
+                          getResult.getString(12)}); //Display password as ****** ???
+                    }
+            }
+                
+            }catch(Exception e) {
+                    System.out.println("Error " + e.getMessage());
+                    }
+    }
+//  Show warning all text must be filled  
+    public void showWarning() {
+        JOptionPane.showMessageDialog(null , "All field must be filled in.", "Dialog",
+                                     JOptionPane.ERROR_MESSAGE);
+    }
+//  Show warning if password did not match
+    public void matchPassWarning() {
+        JOptionPane.showMessageDialog(null , "Password did not match.", "Dialog",
+                                     JOptionPane.ERROR_MESSAGE);
+    }
+//  Show error (invalid transaction)
+    public void showError() {
+        JOptionPane.showMessageDialog(null , "Invalid transaction.", "Dialog",
+                                     JOptionPane.ERROR_MESSAGE);
+    }
+//   Inform user that transaction was successful 
+    public void showSuccess() {
+        JOptionPane.showMessageDialog(null , "Transaction was successful.", "Dialog",
+                                     JOptionPane.INFORMATION_MESSAGE);
+    }
+//    For confirmation (ask yes/no)
+    public void yesOrNo() {
+        int yesNo = JOptionPane.showConfirmDialog(null , "Do you want to proceed?", "Dialog",
+                                     JOptionPane.YES_NO_OPTION);
+        
+        if(yesNo == 0) {confirmYesNo = 0;
+        }else{confirmYesNo = 1;}
+    }
+// Get current date   
+    public void dateToday() {
+        Calendar dateToday = new GregorianCalendar();
+        int currentMonth = dateToday.get(Calendar.MONTH);
+        int currentYear = dateToday.get(Calendar.YEAR);
+        int currentDay = dateToday.get(Calendar.DAY_OF_MONTH);
+        
+        dateDisplayField.setText(currentDay + "-" + (currentMonth+1) + "-" + currentYear);
+        dateDisplayField.setEnabled(false);
+    }
+//  Get value of selected item in the table and load data to fields e. g. accNoDepositField
+    public void tableSelected() {
+        int tableRow = searchTable.getSelectedRow();
+        DefaultTableModel model = (DefaultTableModel)searchTable.getModel();
+//        Insert info to profile tab
+        gNameField.setText(model.getValueAt(tableRow, 1).toString());
+        mNameField.setText(model.getValueAt(tableRow, 2).toString());
+        lNameField.setText(model.getValueAt(tableRow, 3).toString());
+        dateField.setText(model.getValueAt(tableRow, 4).toString());
+        genderField.setText(model.getValueAt(tableRow, 5).toString());
+        nationalityField.setText(model.getValueAt(tableRow, 6).toString());
+        addressField.setText(model.getValueAt(tableRow, 7).toString());
+        emailAddField.setText(model.getValueAt(tableRow, 8).toString());
+        accNumField.setText(model.getValueAt(tableRow, 0).toString());
+        accTypeField.setText(model.getValueAt(tableRow, 9).toString());
+        mobNumField.setText(model.getValueAt(tableRow, 11).toString());  
+        disableProfileField();
+//      Insert info to deposit tab
+        accNoDepositField.setText(model.getValueAt(tableRow, 0).toString());
+        nameDepositField.setText(model.getValueAt(tableRow, 1).toString() + " " + model.getValueAt(tableRow, 2).toString() + " " + model.getValueAt(tableRow, 3).toString());
+        balanceDepositField.setText(model.getValueAt(tableRow, 10).toString());
+        disableDeposit();
+//      Insert info to withdraw tab
+        givenWithdrawField.setText(model.getValueAt(tableRow, 1).toString());
+        middleWithdrawField.setText(model.getValueAt(tableRow, 2).toString());
+        surnameWithdrawField.setText(model.getValueAt(tableRow, 3).toString());
+        accNoWithdrawField.setText(model.getValueAt(tableRow, 0).toString());
+        balanceWithdrawField.setText(model.getValueAt(tableRow, 10).toString());
+        disableWithdraw();
+//      Insert info to transfer tab
+        nameTransferField.setText(model.getValueAt(tableRow, 1).toString() + " " + model.getValueAt(tableRow, 2).toString() + " " + model.getValueAt(tableRow, 3).toString());
+        accTransferField.setText(model.getValueAt(tableRow, 0).toString());
+        balanceTransferField.setText(model.getValueAt(tableRow, 10).toString());
+        disableTransfer();
+//      Insert info to balance field
+        nameBalField.setText(model.getValueAt(tableRow, 1).toString() + " " + model.getValueAt(tableRow, 2).toString() + " " + model.getValueAt(tableRow, 3).toString());
+        accNumBalField.setText(model.getValueAt(tableRow, 0).toString());
+        availBalField.setText(model.getValueAt(tableRow, 10).toString());
+        disableViewBalance();
+//      
+        accChangePinField.setText(model.getValueAt(tableRow, 0).toString());
+        accChangePinField.setEnabled(false);
+    }
+//  Clear Profile Field  
+    public void clearProfileField() {
+        gNameField.setText(""); mNameField.setText(""); lNameField.setText(""); dateField.setText(""); 
+        genderField.setText(""); nationalityField.setText(""); addressField.setText(""); 
+        emailAddField.setText(""); accNumField.setText(""); accTypeField.setText(""); 
+        mobNumField.setText(""); enterNewField.setText(""); confirmNewField.setText("");
+        enableProfileField();
+    }
+//  Disable Profile Field  
+    public void disableProfileField() {
+        gNameField.setEnabled(false); mNameField.setEnabled(false); lNameField.setEnabled(false);
+        dateField.setEnabled(false); genderField.setEnabled(false); nationalityField.setEnabled(false);
+        addressField.setEnabled(false); emailAddField.setEnabled(false); accNumField.setEnabled(false);
+        accTypeField.setEnabled(false); mobNumField.setEnabled(false); enterNewField.setEnabled(false);
+        confirmNewField.setEnabled(false);
+    }
+//    Enable Profile Field
+    public void enableProfileField() {
+        gNameField.setEnabled(true); mNameField.setEnabled(true); lNameField.setEnabled(true);
+        dateField.setEnabled(true); genderField.setEnabled(true); nationalityField.setEnabled(true);
+        addressField.setEnabled(true); emailAddField.setEnabled(true); //accNumField.setEnabled(true);
+        accTypeField.setEnabled(true); mobNumField.setEnabled(true); enterNewField.setEnabled(true);
+        confirmNewField.setEnabled(true);
+    }
+//  Check profile field if empty
+    public void checkProfileField() {
+        if("".equals(gNameField.getText()) | "".equals(mNameField.getText()) | "".equals(lNameField.getText()) | "".equals(dateField.getText()) 
+            | "".equals(genderField.getText()) | "".equals(nationalityField.getText()) | "".equals(addressField.getText()) | "".equals(emailAddField.getText()) 
+            | "".equals(accTypeField.getText()) | "".equals(mobNumField.getText())){//"".equals(enterNewField.getText()) | "".equals(confirmNewField.getText()) ) {
+            checkProfileField = 0;
+        }else {checkProfileField = 1;}
+    }
+//  Disable withdraw field    
+    public void disableWithdraw() {
+        givenWithdrawField.setEnabled(false); middleWithdrawField.setEnabled(false);
+        surnameWithdrawField.setEnabled(false); accNoWithdrawField.setEnabled(false);
+        balanceWithdrawField.setEnabled(false); newBalWithdrawField.setEnabled(false);
+    }
+//    disable deposit field
+    public void disableDeposit() {
+        accNoDepositField.setEnabled(false); nameDepositField.setEnabled(false);
+        balanceDepositField.setEnabled(false); totalDepositField.setEnabled(false);
+    }
+//    disable transfer field
+    public void disableTransfer() {
+        nameTransferField.setEnabled(false); accTransferField.setEnabled(false);
+        balanceTransferField.setEnabled(false); newBalTransferField.setEnabled(false);
+    }
+//  disable view balance field
+    public void disableViewBalance() {
+        nameBalField.setEnabled(false); accNumBalField.setEnabled(false);
+        interestBalField.setEnabled(false); availBalField.setEnabled(false);
+    }
+//  Search acc number for supplying data in combobox (transfer tab)
+    public void transferTab() {
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+            Statement statementSQL = connectionSQL.createStatement();
+
+            String sqlQuery = "SELECT AccountNo FROM bank_client";
+            ResultSet getResult = statementSQL.executeQuery(sqlQuery);
+                
+            while(getResult.next()) {
+                accToTransfer.addItem(getResult.getString("AccountNo"));
+            }
+            connectionSQL.close();
+
+        }catch(Exception e) {
+            System.out.println("Error " + e.getMessage());
+        }
+    }
+//  provide transaction data in transaction tab 
+    public void transactionTable() {
+        String searchValue = searchTransactionField.getText();
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+            Statement statementSQL = connectionSQL.createStatement();
+            String sqlCode = "";
+            
+            DefaultTableModel model = (DefaultTableModel)tableTransaction.getModel();
+            if("".equals(searchValue)) {
+                sqlCode = "SELECT * FROM client_transaction";
+                ResultSet getResult = statementSQL.executeQuery(sqlCode);
+                while(getResult.next()){
+                model.addRow(new String[] {getResult.getString(2), getResult.getString(3), getResult.getString(4), 
+                    getResult.getString(5), getResult.getString(6), 
+                    getResult.getString(7), getResult.getString(8)});
+            }
+            }
+            
+            else {
+                sqlCode = "SELECT * FROM client_transaction WHERE AccountNo="+searchValue;
+            
+                ResultSet getResult = statementSQL.executeQuery(sqlCode);
+                while(getResult.next()){
+                    model.addRow(new String[] {getResult.getString(2), getResult.getString(3), getResult.getString(4), 
+                    getResult.getString(5), getResult.getString(6), 
+                    getResult.getString(7), getResult.getString(8)});
+            }
+            }
+            
+        }catch(Exception e) {
+            System.out.println("Error " + e.getMessage());
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    private void initComponents() {
+
+        nameTransferLabel = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        titleLabel1 = new javax.swing.JLabel();
+        titleLabel2 = new javax.swing.JLabel();
+        labelSearchBy = new javax.swing.JLabel();
+        labelDate = new javax.swing.JLabel();
+        searchField = new javax.swing.JTextField();
+        dateDisplayField = new javax.swing.JTextField();
+        searchByCombo = new javax.swing.JComboBox<>();
+        logoutButton = new javax.swing.JButton();
+        mainPanel = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        functionsPane = new javax.swing.JTabbedPane();
+        homeTab = new javax.swing.JPanel();
+        labelLogo = new javax.swing.JLabel();
+        profileTab = new javax.swing.JPanel();
+        givenName = new javax.swing.JLabel();
+        gNameField = new javax.swing.JTextField();
+        middleName2 = new javax.swing.JLabel();
+        mNameField = new javax.swing.JTextField();
+        surName = new javax.swing.JLabel();
+        lNameField = new javax.swing.JTextField();
+        dateLabel = new javax.swing.JLabel();
+        dateField = new javax.swing.JTextField();
+        addressLabel = new javax.swing.JLabel();
+        addressField = new javax.swing.JTextField();
+        genderLabel = new javax.swing.JLabel();
+        genderField = new javax.swing.JTextField();
+        nationalityLabel = new javax.swing.JLabel();
+        nationalityField = new javax.swing.JTextField();
+        accNumField = new javax.swing.JTextField();
+        accNumLabel = new javax.swing.JLabel();
+        accTypeLabel = new javax.swing.JLabel();
+        accTypeField = new javax.swing.JTextField();
+        mobNumLabel = new javax.swing.JLabel();
+        mobNumField = new javax.swing.JTextField();
+        editButton = new javax.swing.JButton();
+        saveButton = new javax.swing.JButton();
+        pinNewLabel = new javax.swing.JLabel();
+        confirmNewLabel = new javax.swing.JLabel();
+        newButton = new javax.swing.JButton();
+        emailAddLabel = new javax.swing.JLabel();
+        emailAddField = new javax.swing.JTextField();
+        deleteButton = new javax.swing.JButton();
+        clearButton = new javax.swing.JButton();
+        confirmNewField = new javax.swing.JPasswordField();
+        enterNewField = new javax.swing.JPasswordField();
+        depositTab = new javax.swing.JPanel();
+        accNoDeposit = new javax.swing.JLabel();
+        nameDeposit = new javax.swing.JLabel();
+        balanceDeposit = new javax.swing.JLabel();
+        amountDeposit = new javax.swing.JLabel();
+        totalAmountDeposit = new javax.swing.JLabel();
+        accNoDepositField = new javax.swing.JTextField();
+        nameDepositField = new javax.swing.JTextField();
+        balanceDepositField = new javax.swing.JTextField();
+        amountDepositField = new javax.swing.JTextField();
+        totalDepositField = new javax.swing.JTextField();
+        totalDepositButton = new javax.swing.JButton();
+        confirmDepositButton = new javax.swing.JButton();
+        withdrawTab = new javax.swing.JPanel();
+        withdrawPane = new javax.swing.JPanel();
+        givenWithdrawLabel = new javax.swing.JLabel();
+        givenWithdrawField = new javax.swing.JTextField();
+        middleWithdrawLabel = new javax.swing.JLabel();
+        middleWithdrawField = new javax.swing.JTextField();
+        surnameWithdrawLabel = new javax.swing.JLabel();
+        surnameWithdrawField = new javax.swing.JTextField();
+        accNoWithdrawLabel = new javax.swing.JLabel();
+        accNoWithdrawField = new javax.swing.JTextField();
+        balanceWithdrawLabel = new javax.swing.JLabel();
+        balanceWithdrawField = new javax.swing.JTextField();
+        amountWithdrawLabel = new javax.swing.JLabel();
+        amountWithdrawField = new javax.swing.JTextField();
+        newBalWithdrawField = new javax.swing.JTextField();
+        newBalWithdrawLabel = new javax.swing.JLabel();
+        withdrawButton = new javax.swing.JButton();
+        totalWithdrawButton = new javax.swing.JButton();
+        transferTab = new javax.swing.JPanel();
+        nameTransferField = new javax.swing.JTextField();
+        accTransferLabel = new javax.swing.JLabel();
+        balanceTransferLabel = new javax.swing.JLabel();
+        balanceTransferField = new javax.swing.JTextField();
+        amountTransferLabel = new javax.swing.JLabel();
+        accTransferField = new javax.swing.JTextField();
+        accToTransferLabel = new javax.swing.JLabel();
+        amountTransferField = new javax.swing.JTextField();
+        transferButton = new javax.swing.JButton();
+        totalTransferButton = new javax.swing.JButton();
+        newBalTransferLabel = new javax.swing.JLabel();
+        newBalTransferField = new javax.swing.JTextField();
+        accToTransfer = new javax.swing.JComboBox<>();
+        transferToOther = new javax.swing.JTextField();
+        nameTransferLabel1 = new javax.swing.JLabel();
+        viewBalTab = new javax.swing.JPanel();
+        availBalField = new javax.swing.JTextField();
+        interestBalField = new javax.swing.JTextField();
+        accNumBalField = new javax.swing.JTextField();
+        nameBalField = new javax.swing.JTextField();
+        nameBalLabel = new javax.swing.JLabel();
+        accNumBalLabel = new javax.swing.JLabel();
+        interestBalLabel = new javax.swing.JLabel();
+        availBalLabel = new javax.swing.JLabel();
+        transactionsTab = new javax.swing.JPanel();
+        scrollTransaction = new javax.swing.JScrollPane();
+        transactPanel = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableTransaction = new javax.swing.JTable();
+        searchTransactionField = new javax.swing.JTextField();
+        searchTransaction = new javax.swing.JButton();
+        accNumSearch = new javax.swing.JLabel();
+        changePinTab = new javax.swing.JPanel();
+        cNewPinLabel = new javax.swing.JLabel();
+        newPinLabel = new javax.swing.JLabel();
+        oldPinLabel = new javax.swing.JLabel();
+        saveChangePinButton = new javax.swing.JButton();
+        clearChangePinButton = new javax.swing.JButton();
+        accChangePinField = new javax.swing.JTextField();
+        accNumPinLabel = new javax.swing.JLabel();
+        oldPinField = new javax.swing.JPasswordField();
+        newPinField = new javax.swing.JPasswordField();
+        cNewPinField = new javax.swing.JPasswordField();
+        authorizedPanel = new javax.swing.JPanel();
+        usernameLabel = new javax.swing.JLabel();
+        usernameField = new javax.swing.JTextField();
+        passwordLabel = new javax.swing.JLabel();
+        passwordField = new javax.swing.JPasswordField();
+        signUpButton = new javax.swing.JButton();
+        confirmField = new javax.swing.JPasswordField();
+        confirmLabel = new javax.swing.JLabel();
+        showAccButton = new javax.swing.JButton();
+        scrollAcc = new javax.swing.JScrollPane();
+        accountsTable = new javax.swing.JTable();
+        devsTab = new javax.swing.JPanel();
+        devsScroll = new javax.swing.JScrollPane();
+        devsPanel = new javax.swing.JPanel();
+        developerPic1 = new javax.swing.JLabel();
+        developerPic2 = new javax.swing.JLabel();
+        developerPic4 = new javax.swing.JLabel();
+        developerPic3 = new javax.swing.JLabel();
+        developerPic5 = new javax.swing.JLabel();
+        developerPic6 = new javax.swing.JLabel();
+        developerPic7 = new javax.swing.JLabel();
+        developersTitle = new javax.swing.JLabel();
+        devName1 = new javax.swing.JLabel();
+        devName2 = new javax.swing.JLabel();
+        devName3 = new javax.swing.JLabel();
+        devName4 = new javax.swing.JLabel();
+        devName5 = new javax.swing.JLabel();
+        devName6 = new javax.swing.JLabel();
+        devName7 = new javax.swing.JLabel();
+        devName8 = new javax.swing.JLabel();
+        searchPanel = new javax.swing.JPanel();
+        scrollSearch = new javax.swing.JScrollPane();
+        searchTablePanel = new javax.swing.JPanel();
+        scrollSearch2 = new javax.swing.JScrollPane();
+        searchTable = new javax.swing.JTable();
+
+        nameTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameTransferLabel.setText("Name                     :");
+        nameTransferLabel.getAccessibleContext().setAccessibleName("nameTransferLabel");
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Bank Management System");
+        setBackground(new java.awt.Color(229, 229, 229));
+
+        jPanel1.setBackground(new java.awt.Color(20, 33, 61));
+
+        titleLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        titleLabel1.setForeground(new java.awt.Color(252, 163, 17));
+        titleLabel1.setText("BANK");
+
+        titleLabel2.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        titleLabel2.setForeground(new java.awt.Color(252, 163, 17));
+        titleLabel2.setText("MANAGEMENT");
+
+        labelSearchBy.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+        labelSearchBy.setForeground(new java.awt.Color(255, 255, 255));
+        labelSearchBy.setText("Search by   :");
+
+        labelDate.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+        labelDate.setForeground(new java.awt.Color(255, 255, 255));
+        labelDate.setText("Date            :");
+
+        searchField.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+
+        dateDisplayField.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+        dateDisplayField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        searchByCombo.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        searchByCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Given Name", "Middle Name", "Surname", "Account Number", " " }));
+        searchByCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchByComboActionPerformed(evt);
+            }
+        });
+
+        logoutButton.setBackground(new java.awt.Color(20, 33, 61));
+        logoutButton.setFont(new java.awt.Font("SansSerif", 2, 14)); // NOI18N
+        logoutButton.setForeground(new java.awt.Color(255, 255, 255));
+        logoutButton.setText("-LOG OUT-");
+        logoutButton.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
+        logoutButton.setContentAreaFilled(false);
+        logoutButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        logoutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logoutButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(titleLabel2)
+                    .addComponent(titleLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelDate)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(labelSearchBy)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(49, 49, 49)
+                        .addComponent(searchByCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(45, 45, 45))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(dateDisplayField, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(logoutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(66, 66, 66))))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(labelSearchBy)
+                            .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(searchByCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(dateDisplayField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(labelDate)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(logoutButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(titleLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(titleLabel2)))
+                .addGap(20, 20, 20))
+        );
+
+        titleLabel1.getAccessibleContext().setAccessibleName("titleLabel1");
+        titleLabel2.getAccessibleContext().setAccessibleName("titleLabel2");
+
+        mainPanel.setBackground(new java.awt.Color(229, 229, 229));
+
+        jPanel2.setBackground(new java.awt.Color(229, 229, 229));
+
+        functionsPane.setBackground(new java.awt.Color(204, 204, 204));
+        functionsPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        functionsPane.setTabPlacement(javax.swing.JTabbedPane.LEFT);
+        functionsPane.setToolTipText("");
+        functionsPane.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        functionsPane.setFont(new java.awt.Font("SansSerif", 0, 16)); // NOI18N
+        functionsPane.setName(""); // NOI18N
+
+        homeTab.setBackground(new java.awt.Color(255, 255, 255));
+        homeTab.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+
+        javax.swing.GroupLayout homeTabLayout = new javax.swing.GroupLayout(homeTab);
+        homeTab.setLayout(homeTabLayout);
+        homeTabLayout.setHorizontalGroup(
+            homeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(homeTabLayout.createSequentialGroup()
+                .addGap(114, 114, 114)
+                .addComponent(labelLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 327, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(111, Short.MAX_VALUE))
+        );
+        homeTabLayout.setVerticalGroup(
+            homeTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(homeTabLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(labelLogo, javax.swing.GroupLayout.PREFERRED_SIZE, 327, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("Home", homeTab);
+        homeTab.getAccessibleContext().setAccessibleName("homeTab");
+
+        profileTab.setBackground(new java.awt.Color(229, 229, 229));
+        profileTab.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+
+        givenName.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        givenName.setText("Given Name    :");
+
+        gNameField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        gNameField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        gNameField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        middleName2.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        middleName2.setText("Middle Name   :");
+
+        mNameField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        mNameField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        mNameField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        surName.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        surName.setText("Surname          :");
+
+        lNameField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        lNameField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        lNameField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        dateLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        dateLabel.setText("Date of Birth    :");
+
+        dateField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        dateField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        dateField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        addressLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        addressLabel.setText("Address           :");
+
+        addressField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        addressField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        addressField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        genderLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        genderLabel.setText("Gender            :");
+
+        genderField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        genderField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        genderField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        nationalityLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nationalityLabel.setText("Nationality       :");
+
+        nationalityField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nationalityField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        nationalityField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accNumField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accNumField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accNumLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumLabel.setText("Account No.        :");
+
+        accTypeLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accTypeLabel.setText("Account Type      :");
+
+        accTypeField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accTypeField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accTypeField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        mobNumLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        mobNumLabel.setText("Mobile No.           :");
+
+        mobNumField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        mobNumField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        mobNumField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        editButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        editButton.setText("Edit");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
+
+        saveButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        saveButton.setText("Save");
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
+
+        pinNewLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        pinNewLabel.setText("Enter Pin              :");
+
+        confirmNewLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        confirmNewLabel.setText("Confirm Pin          :");
+
+        newButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newButton.setText("New");
+        newButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        newButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newButtonActionPerformed(evt);
+            }
+        });
+
+        emailAddLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        emailAddLabel.setText("Email Address    :");
+
+        emailAddField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        emailAddField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        emailAddField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        deleteButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
+
+        clearButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        clearButton.setText("Clear");
+        clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearButtonActionPerformed(evt);
+            }
+        });
+
+        confirmNewField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        confirmNewField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        confirmNewField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        enterNewField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        enterNewField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        enterNewField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        javax.swing.GroupLayout profileTabLayout = new javax.swing.GroupLayout(profileTab);
+        profileTab.setLayout(profileTabLayout);
+        profileTabLayout.setHorizontalGroup(
+            profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(profileTabLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, profileTabLayout.createSequentialGroup()
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(genderLabel)
+                            .addComponent(dateLabel, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGap(18, 18, 18)
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(genderField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dateField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(mobNumLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pinNewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(228, 228, 228))
+                    .addGroup(profileTabLayout.createSequentialGroup()
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(profileTabLayout.createSequentialGroup()
+                                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(middleName2)
+                                    .addComponent(givenName))
+                                .addGap(18, 18, 18)
+                                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(gNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(mNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(profileTabLayout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addComponent(emailAddLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(emailAddField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(profileTabLayout.createSequentialGroup()
+                                        .addGap(17, 17, 17)
+                                        .addComponent(accNumLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(accNumField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(enterNewField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(profileTabLayout.createSequentialGroup()
+                                    .addGap(1, 1, 1)
+                                    .addComponent(nationalityLabel)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(nationalityField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(confirmNewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(confirmNewField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(profileTabLayout.createSequentialGroup()
+                                    .addComponent(surName)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(lNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(accTypeLabel)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(accTypeField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(mobNumField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(profileTabLayout.createSequentialGroup()
+                                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(addressLabel)
+                                    .addGroup(profileTabLayout.createSequentialGroup()
+                                        .addGap(12, 12, 12)
+                                        .addComponent(newButton)))
+                                .addGap(18, 18, 18)
+                                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(profileTabLayout.createSequentialGroup()
+                                        .addGap(15, 15, 15)
+                                        .addComponent(deleteButton)
+                                        .addGap(45, 45, 45)
+                                        .addComponent(editButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(saveButton)
+                                        .addGap(58, 58, 58)
+                                        .addComponent(clearButton))
+                                    .addComponent(addressField, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        profileTabLayout.setVerticalGroup(
+            profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(profileTabLayout.createSequentialGroup()
+                .addContainerGap(15, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(gNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(givenName)
+                    .addComponent(emailAddLabel)
+                    .addComponent(emailAddField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(mNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(middleName2))
+                    .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(accNumField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(accNumLabel)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accTypeLabel)
+                    .addComponent(accTypeField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lNameField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(surName))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(profileTabLayout.createSequentialGroup()
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(dateField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(dateLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(genderField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(genderLabel)
+                            .addComponent(pinNewLabel)
+                            .addComponent(enterNewField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(mobNumLabel)
+                        .addComponent(mobNumField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(confirmNewField, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nationalityField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(confirmNewLabel)
+                    .addComponent(nationalityLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(addressField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addressLabel))
+                .addGap(14, 14, 14)
+                .addGroup(profileTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(newButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(deleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(saveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(editButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(13, Short.MAX_VALUE))
+        );
+
+        editButton.getAccessibleContext().setAccessibleName("editButton");
+        saveButton.getAccessibleContext().setAccessibleName("saveButton");
+        emailAddLabel.getAccessibleContext().setAccessibleName("emailAddLabel");
+        emailAddField.getAccessibleContext().setAccessibleName("emailAddField");
+        deleteButton.getAccessibleContext().setAccessibleName("deleteButton");
+        clearButton.getAccessibleContext().setAccessibleName("clearButton");
+
+        functionsPane.addTab("Profile", profileTab);
+
+        depositTab.setBackground(new java.awt.Color(229, 229, 229));
+        depositTab.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+
+        accNoDeposit.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNoDeposit.setText("Account Number     :");
+
+        nameDeposit.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameDeposit.setText("Name                      :");
+
+        balanceDeposit.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceDeposit.setText("Current Balance     :");
+
+        amountDeposit.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountDeposit.setText("Amount To Deposit :");
+
+        totalAmountDeposit.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        totalAmountDeposit.setText("Total                       :");
+
+        accNoDepositField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNoDepositField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accNoDepositField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        nameDepositField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameDepositField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        nameDepositField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        balanceDepositField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceDepositField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        balanceDepositField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        amountDepositField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountDepositField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        amountDepositField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        totalDepositField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        totalDepositField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        totalDepositField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        totalDepositButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        totalDepositButton.setText("Total");
+        totalDepositButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalDepositButtonActionPerformed(evt);
+            }
+        });
+
+        confirmDepositButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        confirmDepositButton.setText("Deposit");
+        confirmDepositButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                confirmDepositButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout depositTabLayout = new javax.swing.GroupLayout(depositTab);
+        depositTab.setLayout(depositTabLayout);
+        depositTabLayout.setHorizontalGroup(
+            depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(depositTabLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(accNoDeposit, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(amountDeposit, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(totalAmountDeposit, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(balanceDeposit, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(nameDeposit, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(nameDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accNoDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(balanceDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(amountDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(depositTabLayout.createSequentialGroup()
+                        .addComponent(totalDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(totalDepositButton)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, depositTabLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(confirmDepositButton)
+                .addGap(182, 182, 182))
+        );
+        depositTabLayout.setVerticalGroup(
+            depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(depositTabLayout.createSequentialGroup()
+                .addContainerGap(37, Short.MAX_VALUE)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accNoDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accNoDeposit))
+                .addGap(18, 18, 18)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nameDeposit))
+                .addGap(24, 24, 24)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(balanceDeposit)
+                    .addComponent(balanceDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(amountDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(amountDeposit))
+                .addGap(27, 27, 27)
+                .addGroup(depositTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(totalDepositField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(totalAmountDeposit)
+                    .addComponent(totalDepositButton))
+                .addGap(18, 18, 18)
+                .addComponent(confirmDepositButton)
+                .addGap(0, 30, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("Deposit", depositTab);
+
+        withdrawTab.setBackground(new java.awt.Color(229, 229, 229));
+
+        withdrawPane.setBackground(new java.awt.Color(229, 229, 229));
+        withdrawPane.setFont(new java.awt.Font("SansSerif", 0, 18)); // NOI18N
+
+        givenWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        givenWithdrawLabel.setText("Given Name            :");
+
+        givenWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        givenWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        givenWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        middleWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        middleWithdrawLabel.setText("Middle Name           :");
+
+        middleWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        middleWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        middleWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        surnameWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        surnameWithdrawLabel.setText("Surname                  :");
+
+        surnameWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        surnameWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        surnameWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accNoWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNoWithdrawLabel.setText("Account No              :");
+
+        accNoWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNoWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accNoWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        balanceWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceWithdrawLabel.setText("Available Balance    :");
+
+        balanceWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        balanceWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        amountWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountWithdrawLabel.setText("Amount                     :");
+
+        amountWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        amountWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        newBalWithdrawField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newBalWithdrawField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        newBalWithdrawField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        newBalWithdrawLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newBalWithdrawLabel.setText("New Balance            :");
+
+        withdrawButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        withdrawButton.setText("Withdraw");
+        withdrawButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                withdrawButtonActionPerformed(evt);
+            }
+        });
+
+        totalWithdrawButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        totalWithdrawButton.setText("Total");
+        totalWithdrawButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                totalWithdrawButtonMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout withdrawPaneLayout = new javax.swing.GroupLayout(withdrawPane);
+        withdrawPane.setLayout(withdrawPaneLayout);
+        withdrawPaneLayout.setHorizontalGroup(
+            withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(withdrawPaneLayout.createSequentialGroup()
+                .addContainerGap(81, Short.MAX_VALUE)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(withdrawPaneLayout.createSequentialGroup()
+                        .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(withdrawPaneLayout.createSequentialGroup()
+                                .addGap(3, 3, 3)
+                                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(givenWithdrawLabel)
+                                    .addComponent(middleWithdrawLabel)
+                                    .addComponent(surnameWithdrawLabel)
+                                    .addComponent(accNoWithdrawLabel)
+                                    .addComponent(balanceWithdrawLabel)))
+                            .addComponent(newBalWithdrawLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(middleWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(givenWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(surnameWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(accNoWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(balanceWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(amountWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(withdrawPaneLayout.createSequentialGroup()
+                                .addComponent(newBalWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(totalWithdrawButton))))
+                    .addGroup(withdrawPaneLayout.createSequentialGroup()
+                        .addComponent(amountWithdrawLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 304, Short.MAX_VALUE)))
+                .addContainerGap(110, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, withdrawPaneLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(withdrawButton)
+                .addGap(213, 213, 213))
+        );
+        withdrawPaneLayout.setVerticalGroup(
+            withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(withdrawPaneLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(givenWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(givenWithdrawLabel))
+                .addGap(18, 18, 18)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(middleWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(middleWithdrawLabel))
+                .addGap(10, 10, 10)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(surnameWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(surnameWithdrawLabel))
+                .addGap(18, 18, 18)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accNoWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accNoWithdrawLabel))
+                .addGap(18, 18, 18)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(balanceWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(balanceWithdrawLabel))
+                .addGap(18, 18, 18)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(amountWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(amountWithdrawLabel))
+                .addGap(18, 18, 18)
+                .addGroup(withdrawPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(newBalWithdrawField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(newBalWithdrawLabel)
+                    .addComponent(totalWithdrawButton))
+                .addGap(12, 12, 12)
+                .addComponent(withdrawButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        totalWithdrawButton.getAccessibleContext().setAccessibleName("totalButton");
+
+        javax.swing.GroupLayout withdrawTabLayout = new javax.swing.GroupLayout(withdrawTab);
+        withdrawTab.setLayout(withdrawTabLayout);
+        withdrawTabLayout.setHorizontalGroup(
+            withdrawTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 631, Short.MAX_VALUE)
+            .addGroup(withdrawTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(withdrawTabLayout.createSequentialGroup()
+                    .addComponent(withdrawPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
+        );
+        withdrawTabLayout.setVerticalGroup(
+            withdrawTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 348, Short.MAX_VALUE)
+            .addGroup(withdrawTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(withdrawPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        withdrawPane.getAccessibleContext().setAccessibleName("withdrawPane");
+
+        functionsPane.addTab("Withdraw", withdrawTab);
+        withdrawTab.getAccessibleContext().setAccessibleName("newAccTab");
+        withdrawTab.getAccessibleContext().setAccessibleDescription("");
+
+        transferTab.setBackground(new java.awt.Color(229, 229, 229));
+
+        nameTransferField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameTransferField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        nameTransferField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accTransferLabel.setText("Account Number    :");
+
+        balanceTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceTransferLabel.setText("Available Balance  :");
+
+        balanceTransferField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        balanceTransferField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        balanceTransferField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        amountTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountTransferLabel.setText("Amount                   :");
+
+        accTransferField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accTransferField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accTransferField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accToTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accToTransferLabel.setText("Transfer to(Acc No.):");
+
+        amountTransferField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        amountTransferField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        amountTransferField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        transferButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        transferButton.setText("Transfer");
+        transferButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                transferButtonActionPerformed(evt);
+            }
+        });
+
+        totalTransferButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        totalTransferButton.setText("Total");
+        totalTransferButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                totalTransferButtonActionPerformed(evt);
+            }
+        });
+
+        newBalTransferLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newBalTransferLabel.setText("New Balance          :");
+
+        newBalTransferField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newBalTransferField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        newBalTransferField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accToTransfer.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accToTransfer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "0" }));
+        accToTransfer.setToolTipText("");
+        accToTransfer.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        transferToOther.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        transferToOther.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        transferToOther.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        nameTransferLabel1.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameTransferLabel1.setText("Name                     :");
+
+        javax.swing.GroupLayout transferTabLayout = new javax.swing.GroupLayout(transferTab);
+        transferTab.setLayout(transferTabLayout);
+        transferTabLayout.setHorizontalGroup(
+            transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(transferTabLayout.createSequentialGroup()
+                .addGap(64, 64, 64)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(accToTransferLabel)
+                    .addComponent(amountTransferLabel)
+                    .addGroup(transferTabLayout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(balanceTransferLabel)
+                            .addComponent(accTransferLabel)
+                            .addComponent(nameTransferLabel1)))
+                    .addComponent(newBalTransferLabel))
+                .addGap(18, 37, Short.MAX_VALUE)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(nameTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(amountTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(balanceTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(transferTabLayout.createSequentialGroup()
+                        .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(accToTransfer, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(newBalTransferField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(totalTransferButton)
+                            .addComponent(transferToOther))))
+                .addContainerGap(27, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transferTabLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(transferButton)
+                .addGap(196, 196, 196))
+        );
+        transferTabLayout.setVerticalGroup(
+            transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transferTabLayout.createSequentialGroup()
+                .addContainerGap(14, Short.MAX_VALUE)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nameTransferLabel1))
+                .addGap(18, 18, 18)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accTransferLabel))
+                .addGap(18, 18, 18)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(balanceTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(balanceTransferLabel))
+                .addGap(18, 18, 18)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(amountTransferLabel)
+                    .addComponent(amountTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accToTransferLabel)
+                    .addComponent(accToTransfer, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(transferToOther, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addGroup(transferTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(newBalTransferField, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(newBalTransferLabel)
+                    .addComponent(totalTransferButton))
+                .addGap(18, 18, 18)
+                .addComponent(transferButton)
+                .addContainerGap(13, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("Transfer", transferTab);
+
+        viewBalTab.setBackground(new java.awt.Color(229, 229, 229));
+
+        availBalField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        availBalField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        availBalField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        interestBalField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        interestBalField.setText("0.46 %");
+        interestBalField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        interestBalField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        interestBalField.setEnabled(false);
+
+        accNumBalField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumBalField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accNumBalField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        nameBalField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameBalField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        nameBalField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        nameBalLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        nameBalLabel.setText("Name                             :");
+
+        accNumBalLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumBalLabel.setText("Account Number            :");
+
+        interestBalLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        interestBalLabel.setText("Rate of Interest (Weekly):");
+
+        availBalLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        availBalLabel.setText("Available Balance           :");
+
+        javax.swing.GroupLayout viewBalTabLayout = new javax.swing.GroupLayout(viewBalTab);
+        viewBalTab.setLayout(viewBalTabLayout);
+        viewBalTabLayout.setHorizontalGroup(
+            viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(viewBalTabLayout.createSequentialGroup()
+                .addGap(64, 64, 64)
+                .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(viewBalTabLayout.createSequentialGroup()
+                        .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(availBalLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(interestBalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(interestBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(availBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, viewBalTabLayout.createSequentialGroup()
+                        .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(nameBalLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(accNumBalLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(accNumBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(nameBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        viewBalTabLayout.setVerticalGroup(
+            viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(viewBalTabLayout.createSequentialGroup()
+                .addContainerGap(86, Short.MAX_VALUE)
+                .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(nameBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nameBalLabel))
+                .addGap(18, 18, 18)
+                .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accNumBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accNumBalLabel))
+                .addGap(18, 18, 18)
+                .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(interestBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(interestBalLabel))
+                .addGap(18, 18, 18)
+                .addGroup(viewBalTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(availBalLabel)
+                    .addComponent(availBalField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(100, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("View Balance", viewBalTab);
+
+        scrollTransaction.setBackground(new java.awt.Color(229, 229, 229));
+        scrollTransaction.setToolTipText("");
+        scrollTransaction.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollTransaction.setAutoscrolls(true);
+
+        transactPanel.setBackground(new java.awt.Color(229, 229, 229));
+
+        tableTransaction.setAutoCreateRowSorter(true);
+        tableTransaction.setBackground(new java.awt.Color(229, 229, 229));
+        tableTransaction.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        tableTransaction.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Account Number", "Date", "Transaction Type", "Transfer To", "Old Balance", "New Balance", "Transaction Charge"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tableTransaction.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        tableTransaction.setCellSelectionEnabled(true);
+        tableTransaction.setFillsViewportHeight(true);
+        tableTransaction.setShowHorizontalLines(true);
+        tableTransaction.setShowVerticalLines(true);
+        tableTransaction.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableTransactionMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tableTransaction);
+
+        javax.swing.GroupLayout transactPanelLayout = new javax.swing.GroupLayout(transactPanel);
+        transactPanel.setLayout(transactPanelLayout);
+        transactPanelLayout.setHorizontalGroup(
+            transactPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transactPanelLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 799, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        transactPanelLayout.setVerticalGroup(
+            transactPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(transactPanelLayout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        scrollTransaction.setViewportView(transactPanel);
+
+        searchTransactionField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        searchTransactionField.setToolTipText("");
+        searchTransactionField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        searchTransactionField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        searchTransaction.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        searchTransaction.setText("Search");
+        searchTransaction.setToolTipText("");
+        searchTransaction.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchTransactionActionPerformed(evt);
+            }
+        });
+
+        accNumSearch.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumSearch.setText("Account Number    :");
+
+        javax.swing.GroupLayout transactionsTabLayout = new javax.swing.GroupLayout(transactionsTab);
+        transactionsTab.setLayout(transactionsTabLayout);
+        transactionsTabLayout.setHorizontalGroup(
+            transactionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(transactionsTabLayout.createSequentialGroup()
+                .addGap(121, 121, 121)
+                .addComponent(accNumSearch)
+                .addGap(18, 18, 18)
+                .addComponent(searchTransactionField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(searchTransaction)
+                .addContainerGap(65, Short.MAX_VALUE))
+            .addComponent(scrollTransaction, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+        transactionsTabLayout.setVerticalGroup(
+            transactionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(transactionsTabLayout.createSequentialGroup()
+                .addComponent(scrollTransaction, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(transactionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, transactionsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(searchTransactionField, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(accNumSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(searchTransaction, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
+        );
+
+        functionsPane.addTab("Transactions", transactionsTab);
+
+        changePinTab.setBackground(new java.awt.Color(229, 229, 229));
+
+        cNewPinLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        cNewPinLabel.setText("Confirm new pin         :");
+
+        newPinLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newPinLabel.setText("Enter new pin             :");
+
+        oldPinLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        oldPinLabel.setText("Enter old pin               :");
+
+        saveChangePinButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        saveChangePinButton.setText("Save");
+        saveChangePinButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveChangePinButtonActionPerformed(evt);
+            }
+        });
+
+        clearChangePinButton.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        clearChangePinButton.setText("Clear");
+        clearChangePinButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearChangePinButtonActionPerformed(evt);
+            }
+        });
+
+        accChangePinField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accChangePinField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        accChangePinField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        accNumPinLabel.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accNumPinLabel.setText("Account Number         :");
+
+        oldPinField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        oldPinField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        oldPinField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        newPinField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        newPinField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        newPinField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        cNewPinField.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        cNewPinField.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        cNewPinField.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+
+        javax.swing.GroupLayout changePinTabLayout = new javax.swing.GroupLayout(changePinTab);
+        changePinTab.setLayout(changePinTabLayout);
+        changePinTabLayout.setHorizontalGroup(
+            changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, changePinTabLayout.createSequentialGroup()
+                .addContainerGap(95, Short.MAX_VALUE)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(changePinTabLayout.createSequentialGroup()
+                        .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(oldPinLabel)
+                            .addComponent(newPinLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cNewPinLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(accNumPinLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(oldPinField)
+                            .addComponent(accChangePinField, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(newPinField)
+                            .addComponent(cNewPinField, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(changePinTabLayout.createSequentialGroup()
+                        .addComponent(clearChangePinButton)
+                        .addGap(18, 18, 18)
+                        .addComponent(saveChangePinButton)))
+                .addContainerGap(127, Short.MAX_VALUE))
+        );
+        changePinTabLayout.setVerticalGroup(
+            changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, changePinTabLayout.createSequentialGroup()
+                .addContainerGap(64, Short.MAX_VALUE)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accChangePinField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(accNumPinLabel))
+                .addGap(18, 18, 18)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(oldPinLabel)
+                    .addComponent(oldPinField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(22, 22, 22)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(newPinLabel)
+                    .addComponent(newPinField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cNewPinLabel)
+                    .addComponent(cNewPinField, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(changePinTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(saveChangePinButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(clearChangePinButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(65, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("Change Pin", changePinTab);
+
+        authorizedPanel.setBackground(new java.awt.Color(229, 229, 229));
+
+        usernameLabel.setFont(new java.awt.Font("Trebuchet MS", 0, 18)); // NOI18N
+        usernameLabel.setText("Username");
+
+        usernameField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+
+        passwordLabel.setFont(new java.awt.Font("Trebuchet MS", 0, 18)); // NOI18N
+        passwordLabel.setText("New Password");
+
+        passwordField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+
+        signUpButton.setBackground(new java.awt.Color(20, 33, 61));
+        signUpButton.setFont(new java.awt.Font("Trebuchet MS", 0, 18)); // NOI18N
+        signUpButton.setForeground(new java.awt.Color(255, 255, 255));
+        signUpButton.setText("SIGNUP");
+        signUpButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        signUpButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                signUpButtonActionPerformed(evt);
+            }
+        });
+
+        confirmField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+
+        confirmLabel.setFont(new java.awt.Font("Trebuchet MS", 0, 18)); // NOI18N
+        confirmLabel.setText("Confirm New Password");
+
+        showAccButton.setBackground(new java.awt.Color(20, 33, 61));
+        showAccButton.setFont(new java.awt.Font("Trebuchet MS", 0, 18)); // NOI18N
+        showAccButton.setForeground(new java.awt.Color(255, 255, 255));
+        showAccButton.setText("SHOW");
+        showAccButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showAccButtonActionPerformed(evt);
+            }
+        });
+
+        scrollAcc.setBackground(new java.awt.Color(229, 229, 229));
+        scrollAcc.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true));
+        scrollAcc.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+
+        accountsTable.setAutoCreateRowSorter(true);
+        accountsTable.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        accountsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ACCOUNTS"
+            }
+        ));
+        accountsTable.setToolTipText("");
+        scrollAcc.setViewportView(accountsTable);
+
+        javax.swing.GroupLayout authorizedPanelLayout = new javax.swing.GroupLayout(authorizedPanel);
+        authorizedPanel.setLayout(authorizedPanelLayout);
+        authorizedPanelLayout.setHorizontalGroup(
+            authorizedPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(authorizedPanelLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(authorizedPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(confirmField, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(confirmLabel)
+                    .addGroup(authorizedPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(usernameField)
+                        .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(usernameLabel)
+                        .addComponent(passwordLabel))
+                    .addGroup(authorizedPanelLayout.createSequentialGroup()
+                        .addGap(60, 60, 60)
+                        .addComponent(signUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addGroup(authorizedPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, authorizedPanelLayout.createSequentialGroup()
+                        .addComponent(showAccButton, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(75, 75, 75))
+                    .addComponent(scrollAcc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
+        authorizedPanelLayout.setVerticalGroup(
+            authorizedPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(authorizedPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(scrollAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(showAccButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 12, Short.MAX_VALUE))
+            .addGroup(authorizedPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(usernameLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(usernameField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21)
+                .addComponent(passwordLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(confirmLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(confirmField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(signUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        functionsPane.addTab("Authorized Acc", authorizedPanel);
+
+        devsScroll.setBackground(new java.awt.Color(229, 229, 229));
+        devsScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        devsPanel.setBackground(new java.awt.Color(229, 229, 229));
+        devsPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        devsPanel.setName(""); // NOI18N
+
+        developerPic1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developerPic7.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        developersTitle.setFont(new java.awt.Font("SansSerif", 1, 24)); // NOI18N
+        developersTitle.setText("DEVELOPERS");
+
+        devName1.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName1.setText("DIZON, REGGIE JAY");
+
+        devName2.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+
+        devName3.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName3.setText("DUQUE, GLENN");
+
+        devName4.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName4.setText("DOMINGO, CARL GABRIEL");
+
+        devName5.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName5.setText("GALANG, EDWARD JONES");
+
+        devName6.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName6.setText("GEGANTE, ERICA JOYCE");
+
+        devName7.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName7.setText("LACAP, VENZ ADRIEL");
+
+        devName8.setFont(new java.awt.Font("SansSerif", 3, 14)); // NOI18N
+        devName8.setText("LASCANO, JYLEREAL");
+
+        javax.swing.GroupLayout devsPanelLayout = new javax.swing.GroupLayout(devsPanel);
+        devsPanel.setLayout(devsPanelLayout);
+        devsPanelLayout.setHorizontalGroup(
+            devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(devsPanelLayout.createSequentialGroup()
+                .addContainerGap(54, Short.MAX_VALUE)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(devsPanelLayout.createSequentialGroup()
+                        .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(devName1, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(developerPic1, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(devsPanelLayout.createSequentialGroup()
+                                .addGap(0, 54, Short.MAX_VALUE)
+                                .addComponent(devName4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(devName2, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(344, 344, 344))
+                            .addGroup(devsPanelLayout.createSequentialGroup()
+                                .addGap(72, 72, 72)
+                                .addComponent(developerPic2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(devsPanelLayout.createSequentialGroup()
+                        .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(devsPanelLayout.createSequentialGroup()
+                                    .addGap(28, 28, 28)
+                                    .addComponent(devName3)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(devName5))
+                                .addGroup(devsPanelLayout.createSequentialGroup()
+                                    .addComponent(developerPic3, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(75, 75, 75)
+                                    .addComponent(developerPic4, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(devsPanelLayout.createSequentialGroup()
+                                    .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(devsPanelLayout.createSequentialGroup()
+                                            .addComponent(developerPic5, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, devsPanelLayout.createSequentialGroup()
+                                            .addComponent(devName6)
+                                            .addGap(77, 77, 77)))
+                                    .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(devsPanelLayout.createSequentialGroup()
+                                            .addGap(6, 6, 6)
+                                            .addComponent(devName7))
+                                        .addComponent(developerPic6, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(devsPanelLayout.createSequentialGroup()
+                                .addGap(126, 126, 126)
+                                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(developerPic7, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(devsPanelLayout.createSequentialGroup()
+                                        .addGap(6, 6, 6)
+                                        .addComponent(devName8)))))
+                        .addContainerGap())))
+            .addGroup(devsPanelLayout.createSequentialGroup()
+                .addGap(174, 174, 174)
+                .addComponent(developersTitle)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        devsPanelLayout.setVerticalGroup(
+            devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(devsPanelLayout.createSequentialGroup()
+                .addGap(53, 53, 53)
+                .addComponent(developersTitle)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(developerPic2, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(developerPic1, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(devName2)
+                    .addComponent(devName4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(devName1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(34, 34, 34)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(developerPic4, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(developerPic3, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(devName3)
+                    .addComponent(devName5))
+                .addGap(33, 33, 33)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(developerPic5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(developerPic6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(devsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(devName6)
+                    .addComponent(devName7))
+                .addGap(24, 24, 24)
+                .addComponent(developerPic7, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(devName8)
+                .addContainerGap(46, Short.MAX_VALUE))
+        );
+
+        devsScroll.setViewportView(devsPanel);
+
+        javax.swing.GroupLayout devsTabLayout = new javax.swing.GroupLayout(devsTab);
+        devsTab.setLayout(devsTabLayout);
+        devsTabLayout.setHorizontalGroup(
+            devsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(devsScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 552, Short.MAX_VALUE)
+        );
+        devsTabLayout.setVerticalGroup(
+            devsTabLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(devsScroll, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
+        );
+
+        functionsPane.addTab("Developers", devsTab);
+
+        searchPanel.setBackground(new java.awt.Color(229, 229, 229));
+        searchPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        searchPanel.setAutoscrolls(true);
+
+        scrollSearch.setBackground(new java.awt.Color(229, 229, 229));
+        scrollSearch.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollSearch.setAutoscrolls(true);
+
+        searchTablePanel.setBackground(new java.awt.Color(229, 229, 229));
+
+        scrollSearch2.setBackground(new java.awt.Color(229, 229, 229));
+
+        searchTable.setAutoCreateRowSorter(true);
+        searchTable.setBackground(new java.awt.Color(229, 229, 229));
+        searchTable.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        searchTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Account Number", "Given Name", "Middle Name", "Surname", "Date of Birth", "Gender", "Nationality", "Address", "Email Address", "Account Type", "Balance", "Mobile Number"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        searchTable.setToolTipText("");
+        searchTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        searchTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        searchTable.setFillsViewportHeight(true);
+        searchTable.setShowGrid(false);
+        searchTable.setShowHorizontalLines(true);
+        searchTable.setShowVerticalLines(true);
+        searchTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                searchTableMouseClicked(evt);
+            }
+        });
+        scrollSearch2.setViewportView(searchTable);
+
+        javax.swing.GroupLayout searchTablePanelLayout = new javax.swing.GroupLayout(searchTablePanel);
+        searchTablePanel.setLayout(searchTablePanelLayout);
+        searchTablePanelLayout.setHorizontalGroup(
+            searchTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(scrollSearch2, javax.swing.GroupLayout.PREFERRED_SIZE, 1274, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        searchTablePanelLayout.setVerticalGroup(
+            searchTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(searchTablePanelLayout.createSequentialGroup()
+                .addComponent(scrollSearch2, javax.swing.GroupLayout.PREFERRED_SIZE, 623, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+
+        scrollSearch.setViewportView(searchTablePanel);
+
+        javax.swing.GroupLayout searchPanelLayout = new javax.swing.GroupLayout(searchPanel);
+        searchPanel.setLayout(searchPanelLayout);
+        searchPanelLayout.setHorizontalGroup(
+            searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(scrollSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
+        );
+        searchPanelLayout.setVerticalGroup(
+            searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(scrollSearch, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(functionsPane, javax.swing.GroupLayout.PREFERRED_SIZE, 690, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(searchPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(searchPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(functionsPane))
+                .addContainerGap())
+        );
+
+        functionsPane.getAccessibleContext().setAccessibleName("mainPanel");
+
+        javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
+        mainPanel.setLayout(mainPanelLayout);
+        mainPanelLayout.setHorizontalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        mainPanelLayout.setVerticalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        mainPanel.getAccessibleContext().setAccessibleName("mainPanel");
+
+        pack();
+    }// </editor-fold>                        
+
+//  Add New Client
+    private void newButtonActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        accNumField.setEnabled(false); //enterNewField.setEnabled(true); confirmNewField.setEnabled(true);
+        String getGName = gNameField.getText(); String middleName = mNameField.getText();
+        String getSurname = lNameField.getText(); String birthDate = dateField.getText();
+        String getGender = genderField.getText(); String getNationality = nationalityField.getText();
+        String getAddress = addressField.getText(); String getEmail = emailAddField.getText();
+        String accType = accTypeField.getText(); String mobileNum = mobNumField.getText();
+        checkProfileField();
+        if(checkProfileField == 0 | "".equals(enterNewField.getText()) | "".equals(confirmNewField.getText())) {
+            showWarning();
+        }else {
+            int newPass = Integer.parseInt(enterNewField.getText()); int confirmPass =Integer.parseInt(confirmNewField.getText());
+            checkProfileField();
+            if(checkProfileField == 0) {
+                showWarning();
+            }else if(newPass != confirmPass) {
+                matchPassWarning();
+            }else {
+                yesOrNo();
+                if(confirmYesNo == 0) {
+                    try{
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                        Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                        Statement statementSQL = connectionSQL.createStatement();
+
+                        String sqlQuery = "INSERT INTO bank_client (GivenName, MiddleName, Surname, DateofBirth, Gender, Nationality, Address, EmailAddress, Balance, AccountType, MobileNo, Pin) " 
+                                + "VALUES ('"+getGName+"', '"+middleName+"', '"+getSurname+"', '"+birthDate+"', '"+getGender+"',  '"
+                                +getNationality+"', '"+getAddress+"', '"+getEmail+"', '"+0+"', '"+accType+"', '"+mobileNum+"', '"+newPass+"')";
+
+                        statementSQL.executeUpdate(sqlQuery);
+                        clearProfileField(); connectionSQL.close();
+                        showSuccess(); searchData(); checkProfileField = 0;
+                    }catch(Exception e) {
+                        System.out.println("Error " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }                                         
+//  Will enable profile field
+    private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        enableProfileField(); enterNewField.setEnabled(false); confirmNewField.setEnabled(false);    
+    }                                          
+//  Will run tableSelected function when searchTable is clicked
+    private void searchTableMouseClicked(java.awt.event.MouseEvent evt) {                                         
+        tableSelected();
+    }                                        
+//  Clear profile field
+    private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {                                            
+        clearProfileField();
+    }                                           
+//Delete User
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {                                             
+        
+        if("".equals(accNumField.getText())) {
+            showWarning();
+        }else {
+            int accNumber = Integer.parseInt(accNumField.getText());
+            yesOrNo();
+            if(confirmYesNo == 0) {
+                try{
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                    Statement statementSQL = connectionSQL.createStatement();
+
+                    String sqlQuery = "DELETE from bank_client WHERE AccountNo="+accNumber;
+
+                    statementSQL.executeUpdate(sqlQuery);
+                    connectionSQL.close();               
+                    clearProfileField(); showSuccess(); searchData();
+                }catch(Exception e) {
+                    System.out.println("Error " + e.getMessage());
+                }
+            }
+        }
+    }                                            
+//  Save edit user info
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {                                           
+
+        String getGName = gNameField.getText(); String middleName = mNameField.getText();
+        String getSurname = lNameField.getText(); String birthDate = dateField.getText();
+        String getGender = genderField.getText(); String getNationality = nationalityField.getText();
+        String getAddress = addressField.getText(); String getEmail = emailAddField.getText();
+        String accType = accTypeField.getText(); String mobileNum = mobNumField.getText();
+        
+        checkProfileField();
+        if(checkProfileField == 0) {
+            showWarning();
+        }
+        else {
+            int accNumber = Integer.parseInt(accNumField.getText());
+            yesOrNo();
+            if(confirmYesNo == 0) {
+                try{
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                    Statement statementSQL = connectionSQL.createStatement();
+
+                    String sqlQuery = "UPDATE bank_client SET GivenName='"+getGName+"', MiddleName='"+middleName+"', Surname='"
+                            +getSurname+"', DateofBirth='"+birthDate+"', Gender='"+getGender+"', Nationality='"+getNationality+"', Address='"
+                            +getAddress+"', EmailAddress='"+getEmail+"', AccountType='"+accType+"', MobileNo='"+mobileNum+"' WHERE AccountNo="+accNumber;
+
+                    statementSQL.executeUpdate(sqlQuery); checkProfileField = 0;
+                    connectionSQL.close(); clearProfileField(); showSuccess(); searchData();
+                }catch(Exception e) {
+                    System.out.println("Error " + e.getMessage());
+                }
+            } 
+        }
+    }                                          
+//  Check if there is amount to withdraw and if true, the amount will be suntracted to the current balance 
+    private void totalWithdrawButtonMouseClicked(java.awt.event.MouseEvent evt) {                                                 
+        if("".equals(amountWithdrawField.getText())){
+            showWarning();
+        }else {
+            float currentBalance = Float.parseFloat(balanceWithdrawField.getText());
+            float amountToWithdraw = Float.parseFloat(amountWithdrawField.getText());
+            if(amountToWithdraw > currentBalance | amountToWithdraw < 100){
+                showError();
+            }else {
+                totalAmount = (currentBalance - amountToWithdraw) - transactionCharge;
+                newBalWithdrawField.setText(Float.toString(totalAmount));
+            }
+        }
+        
+    }                                                
+//  Confirm withdraw
+    private void withdrawButtonActionPerformed(java.awt.event.ActionEvent evt) {                                               
+        String accNumber = accNoWithdrawField.getText();
+        String transactType = "Withdraw";
+        String currentDate = dateDisplayField.getText();
+        
+        if("".equals(accNumber) | "".equals(amountWithdrawField.getText()) | "".equals(newBalWithdrawField.getText())){
+            showWarning();
+        }else {
+            float currentBalance = Float.parseFloat(balanceWithdrawField.getText());
+
+            if(Float.parseFloat(amountWithdrawField.getText()) < 100) {
+                showError();
+            }else {
+                yesOrNo();
+                if(confirmYesNo == 0) {
+                    try{
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                        Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                        Statement statementSQL = connectionSQL.createStatement();
+
+                        String sqlQuery = "UPDATE bank_client SET Balance='"+totalAmount+"' WHERE AccountNo="+accNumber;
+                        statementSQL.executeUpdate(sqlQuery);
+
+                        String sqlQuery2 = "INSERT INTO client_transaction (AccountNo, Date, TransactionType, TransferTo, OldBalance, NewBalance, Charge) "
+                                + "VALUES ('"+accNumber+"', '"+currentDate+"', '"+transactType+"', '', '"+currentBalance+"', '"+totalAmount+"', '"+transactionCharge+"')";
+                        statementSQL.executeUpdate(sqlQuery2);
+                        connectionSQL.close();
+                        showSuccess(); searchData();
+                        amountWithdrawField.setText(""); balanceWithdrawField.setText(Float.toString(totalAmount));
+                        newBalWithdrawField.setText("");
+                        totalDepositField.setText(""); balanceDepositField.setText(String.valueOf(totalAmount));
+                        totalAmount = 0;
+                    }catch(Exception e) {
+                        System.out.println("Error " + e.getMessage());
+                    }
+                }
+            }
+        }
+        
+    }                                              
+//  Check if there is amount to deposit and if true, the amount will be added to the current balance 
+    private void totalDepositButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                   
+        if("".equals(amountDepositField.getText())) {
+            showWarning();
+        }else {
+            float amountToDeposit = Float.parseFloat(amountDepositField.getText());
+            float amountBalance = Float.parseFloat(balanceDepositField.getText());
+            if(amountToDeposit < 100) {
+                showError();
+            }else {
+                totalAmount = amountBalance + amountToDeposit;
+                totalDepositField.setText(Float.toString(totalAmount));
+            }
+        }
+    }                                                  
+//  Confirm deposit
+    private void confirmDepositButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
+        String accNumber = accNoDepositField.getText();
+        String transactType = "Deposit";
+        String currentDate = dateDisplayField.getText();
+        
+        if("".equals(accNumber) | "".equals(nameDepositField.getText()) | "".equals(balanceDepositField.getText()) | "".equals(totalDepositField.getText())) {
+            showWarning();
+        }else {
+            float currentBalance = Float.parseFloat(balanceDepositField.getText());
+            if(Float.parseFloat(amountDepositField.getText()) < 100) {
+                showError();
+            }else {
+                yesOrNo();
+                if(confirmYesNo == 0) {
+                    try{
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                        Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                        Statement statementSQL = connectionSQL.createStatement();
+
+                        String sqlQuery = "UPDATE bank_client SET Balance='"+totalAmount+"' WHERE AccountNo="+accNumber;
+                        statementSQL.executeUpdate(sqlQuery);
+
+                        String sqlQuery2 = "INSERT INTO client_transaction (AccountNo, Date, TransactionType, TransferTo, OldBalance, NewBalance, Charge) "
+                                + "VALUES ('"+accNumber+"', '"+currentDate+"','"+transactType+"', '',  '"+currentBalance+"', '"+totalAmount+"', '"+transactionCharge+"')";
+                        statementSQL.executeUpdate(sqlQuery2);
+                        connectionSQL.close();
+                        amountDepositField.setText("");
+                        totalDepositField.setText(""); balanceDepositField.setText(String.valueOf(totalAmount));
+                        showSuccess(); searchData(); totalAmount = 0;
+
+                    }catch(Exception e) {
+                        System.out.println("Error " + e.getMessage());
+                    }
+                }
+            }
+        }        
+    }                                                    
+//  Check if there is amount to transfer and if true, the amount will be subtracted to the current balance
+    private void totalTransferButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                    
+        if("".equals(amountTransferField.getText())) {
+            showWarning();
+        }else {
+            float amountToTransfer = Float.parseFloat(amountTransferField.getText());
+            float amountBalance = Float.parseFloat(balanceTransferField.getText());
+            if(amountBalance < amountToTransfer | amountToTransfer < 100) {
+                showError();
+            }else {
+                totalAmount = (amountBalance - amountToTransfer) - transactionCharge;
+                newBalTransferField.setText(Float.toString(totalAmount));
+            }
+        }
+    }                                                   
+//  Confirm transfer
+    private void transferButtonActionPerformed(java.awt.event.ActionEvent evt) {                                               
+        String accNumber = accTransferField.getText();
+        String transactType = "Transfer";
+        String currentDate = dateDisplayField.getText();
+        String transferTo = accToTransfer.getItemAt(accToTransfer.getSelectedIndex());
+        String transferOther = transferToOther.getText();
+        int determineTransfer = 0;
+        
+        
+        if("0".equals(transferTo)) {
+            if("".equals(transferOther) | accNumber.equals(transferOther) | "".equals(newBalTransferField.getText())) {
+                showError();
+            }else {
+                determineTransfer = 1;
+            }
+        }else {
+            if(transferTo.equals(accNumber) | "".equals(newBalTransferField.getText())) {
+                showWarning();
+            }else {
+                determineTransfer = 2;
+            }
+        }
+        
+        if(determineTransfer == 1 | determineTransfer == 2) {
+            if("".equals(nameTransferField.getText())) {
+                showWarning();
+            }else {
+                float currentBalance = Float.parseFloat(balanceTransferField.getText());
+                float amountToTransfer = Float.parseFloat(amountTransferField.getText());
+
+                if(amountToTransfer < 100) {
+                    showError();
+                }else {
+                    yesOrNo();
+                    if(confirmYesNo == 0) {
+                        try{
+                            Class.forName("com.mysql.cj.jdbc.Driver");
+                            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                            Statement statementSQL = connectionSQL.createStatement();
+
+                            String sqlQuery = "UPDATE bank_client SET Balance='"+totalAmount+"' WHERE AccountNo="+accNumber;
+                            statementSQL.executeUpdate(sqlQuery);
+
+                            String sqlQuery1 = "";
+                            String sqlQuery2 = "";
+
+                            if(determineTransfer == 1) {
+                                sqlQuery1 = "INSERT INTO client_transaction (AccountNo, Date, TransactionType, TransferTo, OldBalance, NewBalance, Charge) "
+                                    + "VALUES ('"+accNumber+"', '"+currentDate+"', '"+transactType+"', '"+transferOther+"', '"+currentBalance+"', '"+totalAmount+"', '"+transactionCharge+"')";
+                                statementSQL.executeUpdate(sqlQuery1);
+                                
+                                sqlQuery2 = "SELECT Balance FROM bank_client WHERE AccountNo="+transferOther;
+                                ResultSet getResult = statementSQL.executeQuery(sqlQuery2);
+                                float receivedBal = 0;
+                                while(getResult.next()) {
+                                    receivedBal = Float.parseFloat(getResult.getString("Balance"));
+                                }
+                                float newReceivedBal = receivedBal + amountToTransfer;
+
+                                String sqlQuery3 = "UPDATE bank_client SET Balance='"+newReceivedBal+"' WHERE AccountNo="+transferOther;
+                                statementSQL.executeUpdate(sqlQuery3);
+
+                                connectionSQL.close();
+                                showSuccess(); searchData(); amountTransferField.setText(""); transferToOther.setText("");
+                                newBalTransferField.setText(""); balanceTransferField.setText(String.valueOf(totalAmount));
+                                totalAmount = 0; searchData();
+
+                            }else if (determineTransfer == 2) {
+
+                                sqlQuery1 = "INSERT INTO client_transaction (AccountNo, Date, TransactionType, TransferTo, OldBalance, NewBalance, Charge) "
+                                    + "VALUES ('"+accNumber+"', '"+currentDate+"', '"+transactType+"', '"+transferTo+"', '"+currentBalance+"', '"+totalAmount+"', '"+transactionCharge+"')";
+                                statementSQL.executeUpdate(sqlQuery1);
+                                sqlQuery2 = "SELECT Balance FROM bank_client WHERE AccountNo="+transferTo;
+                                ResultSet getResult = statementSQL.executeQuery(sqlQuery2);
+                                float receivedBal = 0;
+                                while(getResult.next()) {
+                                    receivedBal = Float.parseFloat(getResult.getString("Balance"));
+                                }
+                                float newReceivedBal = receivedBal + amountToTransfer;
+
+                                String sqlQuery3 = "UPDATE bank_client SET Balance='"+newReceivedBal+"' WHERE AccountNo="+transferTo;
+                                statementSQL.executeUpdate(sqlQuery3);
+
+                                connectionSQL.close();
+                                showSuccess(); searchData(); amountTransferField.setText(""); transferToOther.setText("");
+                                newBalTransferField.setText(""); balanceTransferField.setText(String.valueOf(totalAmount));
+                                totalAmount = 0; searchData();
+                            }
+                        }catch(Exception e) {
+                            System.out.println("Error " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+    }                                              
+//  Will clear transaction table, then call function transactionTable() to supply data to transaction tab(HISTORY)
+    private void searchTransactionActionPerformed(java.awt.event.ActionEvent evt) {                                                  
+        ((DefaultTableModel)tableTransaction.getModel()).setRowCount(0);
+        transactionTable();
+    }                                                 
+//  Change pin
+    private void saveChangePinButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                    
+        if("".equals(newPinField.getText()) | "".equals(cNewPinField.getText()) | "".equals(oldPinField.getText())) {
+            showWarning();
+        }else {
+            String accNumber = accChangePinField.getText();
+            int pinCode = 0;
+            int newPin = Integer.parseInt(newPinField.getText());
+            int  confirmNewPin = Integer.parseInt(cNewPinField.getText());
+            String transactType = "Change Pin";
+            String currentDate = dateDisplayField.getText();
+            
+            yesOrNo();
+            if(confirmYesNo == 0) {
+                try{
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection connectionSQL = DriverManager.getConnection(SUrl, SUser,SPass);
+                    Statement statementSQL = connectionSQL.createStatement();
+
+                    String sqlQuery1 = "SELECT Pin FROM bank_client WHERE AccountNo="+accNumber;
+                    ResultSet getResult = statementSQL.executeQuery(sqlQuery1);
+                    while(getResult.next()) {
+                        pinCode = Integer.parseInt(getResult.getString("Pin"));
+                    }
+
+                    if(newPin != confirmNewPin) {
+                        matchPassWarning();
+                    }else if(pinCode == newPin | pinCode == confirmNewPin){
+                        JOptionPane.showMessageDialog(null, "You entered an old pin, new pin is required", "Dialog", JOptionPane.ERROR_MESSAGE);
+                    }else if(pinCode != Integer.parseInt(oldPinField.getText())){
+                        JOptionPane.showMessageDialog(null, "Your old password is wrong", "Dialog", JOptionPane.ERROR_MESSAGE);                        
+                    }else {
+                        String sqlQuery2 = "UPDATE bank_client SET Pin='"+newPin+"' WHERE AccountNo="+accNumber;
+                        statementSQL.executeUpdate(sqlQuery2);
+
+                        String sqlQuery3 = "INSERT INTO client_transaction (AccountNo, Date, TransactionType, TransferTo, OldBalance, NewBalance, Charge) "
+                            + "VALUES ('"+accNumber+"', '"+currentDate+"','"+transactType+"', '',  '"+0+"', '"+0+"', '"+0+"')";
+                        statementSQL.executeUpdate(sqlQuery3);
+                        connectionSQL.close();
+                        showSuccess(); searchData(); accChangePinField.setText(""); oldPinField.setText("");
+                        newPinField.setText(""); cNewPinField.setText("");
+                    }
+                }catch(Exception e) {
+                    System.out.println("Error " + e.getMessage());
+                }
+            }
+        }
+    }                                                   
+//  Clear change pin field
+    private void clearChangePinButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                     
+        accChangePinField.setText(""); oldPinField.setText("");
+        newPinField.setText(""); cNewPinField.setText("");
+    }                                                    
+//  Supply transaction data to transaction tab
+    private void tableTransactionMouseClicked(java.awt.event.MouseEvent evt) {                                              
+        ((DefaultTableModel)tableTransaction.getModel()).setRowCount(0);
+        transactionTable();
+    }                                             
+//    Search User by clicking the combobox at the bottom side (either fname, lname, acc # etc)
+    private void searchByComboActionPerformed(java.awt.event.ActionEvent evt) {                                              
+        searchData();
+    }                                             
+//  Create new account for system management
+    private void signUpButtonActionPerformed(java.awt.event.ActionEvent evt) {                                             
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser, SPass);
+            Statement statementSQL = connectionSQL.createStatement();
+            if("".equals(usernameField.getText())){
+                JOptionPane.showMessageDialog(new JFrame(), "Email Address/Username is required", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }else if("".equals(passwordField.getText()) | "".equals(confirmField.getText())){
+                JOptionPane.showMessageDialog(new JFrame(), "Password is required", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }else {
+                String getUsername    = usernameField.getText();
+                String getPassword = passwordField.getText();
+
+                if(getPassword.equals(confirmField.getText())){
+                    String sqlQuery = "INSERT INTO accounts (username, password) VALUES('"+getUsername+"', '"+getPassword+"')";
+                    statementSQL.executeUpdate(sqlQuery);
+                    showSuccess(); usernameField.setText(""); passwordField.setText(""); 
+                    confirmField.setText("");
+                }else{
+                    matchPassWarning(); 
+                }
+                
+
+            }
+        }catch(Exception e){
+            System.out.println("Error " + e.getMessage());
+        }
+    }                                            
+//  Show registered acc to access the system
+    private void showAccButtonActionPerformed(java.awt.event.ActionEvent evt) {                                              
+        ((DefaultTableModel)accountsTable.getModel()).setRowCount(0);
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connectionSQL = DriverManager.getConnection(SUrl, SUser, SPass);
+            Statement statementSQL = connectionSQL.createStatement();
+
+            String sqlQuery = "SELECT username FROM accounts";
+                
+            ResultSet getResult = statementSQL.executeQuery(sqlQuery);
+            DefaultTableModel model = (DefaultTableModel)accountsTable.getModel();
+            while(getResult.next()){
+              getResult.getString("username");
+              model.addRow(new String[] {getResult.getString(1)});
+            }
+
+        }catch(Exception e){
+            System.out.println("Error " + e.getMessage());
+        }
+    }                                             
+//  Logout to the system, will redirect to login page
+    private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {                                             
+        JOptionPane.showMessageDialog(null , "Logged out successfully.", "Dialog",
+                                     JOptionPane.INFORMATION_MESSAGE);
+        loginPage accessSystem = new loginPage();
+        accessSystem.setVisible(true);
+        accessSystem.setLocationRelativeTo(null);
+        this.dispose();
+    }                                            
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(bankingSystem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(bankingSystem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(bankingSystem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(bankingSystem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new bankingSystem().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify                     
+    private javax.swing.JTextField accChangePinField;
+    private javax.swing.JLabel accNoDeposit;
+    private javax.swing.JTextField accNoDepositField;
+    private javax.swing.JTextField accNoWithdrawField;
+    private javax.swing.JLabel accNoWithdrawLabel;
+    private javax.swing.JTextField accNumBalField;
+    private javax.swing.JLabel accNumBalLabel;
+    private javax.swing.JTextField accNumField;
+    private javax.swing.JLabel accNumLabel;
+    private javax.swing.JLabel accNumPinLabel;
+    private javax.swing.JLabel accNumSearch;
+    private javax.swing.JComboBox<String> accToTransfer;
+    private javax.swing.JLabel accToTransferLabel;
+    private javax.swing.JTextField accTransferField;
+    private javax.swing.JLabel accTransferLabel;
+    private javax.swing.JTextField accTypeField;
+    private javax.swing.JLabel accTypeLabel;
+    private javax.swing.JTable accountsTable;
+    private javax.swing.JTextField addressField;
+    private javax.swing.JLabel addressLabel;
+    private javax.swing.JLabel amountDeposit;
+    private javax.swing.JTextField amountDepositField;
+    private javax.swing.JTextField amountTransferField;
+    private javax.swing.JLabel amountTransferLabel;
+    private javax.swing.JTextField amountWithdrawField;
+    private javax.swing.JLabel amountWithdrawLabel;
+    private javax.swing.JPanel authorizedPanel;
+    private javax.swing.JTextField availBalField;
+    private javax.swing.JLabel availBalLabel;
+    private javax.swing.JLabel balanceDeposit;
+    private javax.swing.JTextField balanceDepositField;
+    private javax.swing.JTextField balanceTransferField;
+    private javax.swing.JLabel balanceTransferLabel;
+    private javax.swing.JTextField balanceWithdrawField;
+    private javax.swing.JLabel balanceWithdrawLabel;
+    private javax.swing.JPasswordField cNewPinField;
+    private javax.swing.JLabel cNewPinLabel;
+    private javax.swing.JPanel changePinTab;
+    public javax.swing.JButton clearButton;
+    private javax.swing.JButton clearChangePinButton;
+    private javax.swing.JButton confirmDepositButton;
+    private javax.swing.JPasswordField confirmField;
+    private javax.swing.JLabel confirmLabel;
+    private javax.swing.JPasswordField confirmNewField;
+    private javax.swing.JLabel confirmNewLabel;
+    private javax.swing.JTextField dateDisplayField;
+    private javax.swing.JTextField dateField;
+    private javax.swing.JLabel dateLabel;
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JPanel depositTab;
+    private javax.swing.JLabel devName1;
+    private javax.swing.JLabel devName2;
+    private javax.swing.JLabel devName3;
+    private javax.swing.JLabel devName4;
+    private javax.swing.JLabel devName5;
+    private javax.swing.JLabel devName6;
+    private javax.swing.JLabel devName7;
+    private javax.swing.JLabel devName8;
+    private javax.swing.JLabel developerPic1;
+    private javax.swing.JLabel developerPic2;
+    private javax.swing.JLabel developerPic3;
+    private javax.swing.JLabel developerPic4;
+    private javax.swing.JLabel developerPic5;
+    private javax.swing.JLabel developerPic6;
+    private javax.swing.JLabel developerPic7;
+    private javax.swing.JLabel developersTitle;
+    private javax.swing.JPanel devsPanel;
+    private javax.swing.JScrollPane devsScroll;
+    private javax.swing.JPanel devsTab;
+    private javax.swing.JButton editButton;
+    private javax.swing.JTextField emailAddField;
+    private javax.swing.JLabel emailAddLabel;
+    private javax.swing.JPasswordField enterNewField;
+    private javax.swing.JTabbedPane functionsPane;
+    private javax.swing.JTextField gNameField;
+    private javax.swing.JTextField genderField;
+    private javax.swing.JLabel genderLabel;
+    private javax.swing.JLabel givenName;
+    private javax.swing.JTextField givenWithdrawField;
+    private javax.swing.JLabel givenWithdrawLabel;
+    private javax.swing.JPanel homeTab;
+    private javax.swing.JTextField interestBalField;
+    private javax.swing.JLabel interestBalLabel;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField lNameField;
+    private javax.swing.JLabel labelDate;
+    private javax.swing.JLabel labelLogo;
+    private javax.swing.JLabel labelSearchBy;
+    private javax.swing.JButton logoutButton;
+    private javax.swing.JTextField mNameField;
+    private javax.swing.JPanel mainPanel;
+    private javax.swing.JLabel middleName2;
+    private javax.swing.JTextField middleWithdrawField;
+    private javax.swing.JLabel middleWithdrawLabel;
+    private javax.swing.JTextField mobNumField;
+    private javax.swing.JLabel mobNumLabel;
+    private javax.swing.JTextField nameBalField;
+    private javax.swing.JLabel nameBalLabel;
+    private javax.swing.JLabel nameDeposit;
+    private javax.swing.JTextField nameDepositField;
+    private javax.swing.JTextField nameTransferField;
+    private javax.swing.JLabel nameTransferLabel;
+    private javax.swing.JLabel nameTransferLabel1;
+    private javax.swing.JTextField nationalityField;
+    private javax.swing.JLabel nationalityLabel;
+    private javax.swing.JTextField newBalTransferField;
+    private javax.swing.JLabel newBalTransferLabel;
+    private javax.swing.JTextField newBalWithdrawField;
+    private javax.swing.JLabel newBalWithdrawLabel;
+    private javax.swing.JButton newButton;
+    private javax.swing.JPasswordField newPinField;
+    private javax.swing.JLabel newPinLabel;
+    private javax.swing.JPasswordField oldPinField;
+    private javax.swing.JLabel oldPinLabel;
+    private javax.swing.JPasswordField passwordField;
+    private javax.swing.JLabel passwordLabel;
+    private javax.swing.JLabel pinNewLabel;
+    private javax.swing.JPanel profileTab;
+    private javax.swing.JButton saveButton;
+    private javax.swing.JButton saveChangePinButton;
+    private javax.swing.JScrollPane scrollAcc;
+    private javax.swing.JScrollPane scrollSearch;
+    private javax.swing.JScrollPane scrollSearch2;
+    private javax.swing.JScrollPane scrollTransaction;
+    private javax.swing.JComboBox<String> searchByCombo;
+    private javax.swing.JTextField searchField;
+    private javax.swing.JPanel searchPanel;
+    private javax.swing.JTable searchTable;
+    private javax.swing.JPanel searchTablePanel;
+    private javax.swing.JButton searchTransaction;
+    private javax.swing.JTextField searchTransactionField;
+    private javax.swing.JButton showAccButton;
+    private javax.swing.JButton signUpButton;
+    private javax.swing.JLabel surName;
+    private javax.swing.JTextField surnameWithdrawField;
+    private javax.swing.JLabel surnameWithdrawLabel;
+    private javax.swing.JTable tableTransaction;
+    private javax.swing.JLabel titleLabel1;
+    private javax.swing.JLabel titleLabel2;
+    private javax.swing.JLabel totalAmountDeposit;
+    private javax.swing.JButton totalDepositButton;
+    private javax.swing.JTextField totalDepositField;
+    private javax.swing.JButton totalTransferButton;
+    private javax.swing.JButton totalWithdrawButton;
+    private javax.swing.JPanel transactPanel;
+    private javax.swing.JPanel transactionsTab;
+    private javax.swing.JButton transferButton;
+    private javax.swing.JPanel transferTab;
+    private javax.swing.JTextField transferToOther;
+    private javax.swing.JTextField usernameField;
+    private javax.swing.JLabel usernameLabel;
+    private javax.swing.JPanel viewBalTab;
+    private javax.swing.JButton withdrawButton;
+    private javax.swing.JPanel withdrawPane;
+    private javax.swing.JPanel withdrawTab;
+    // End of variables declaration                   
+}
